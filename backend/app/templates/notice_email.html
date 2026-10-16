@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{{ title }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,'SF Pro Text','Segoe UI',Roboto,'Noto Sans Devanagari','Noto Sans',Arial,sans-serif;color:#1d1d1f;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;">
+<tr><td align="center" style="padding:24px 12px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #e0e0e0;border-radius:18px;">
+    <tr><td style="padding:18px 28px;border-bottom:1px solid #e0e0e0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td width="150" valign="middle"><img src="{{ logo_src }}" width="140" alt="{{ header_text }}" style="display:block;width:140px;height:auto;border:0;"></td>
+        <td valign="middle" align="right">
+          <div style="font-size:16px;font-weight:700;color:#1d1d1f;">{{ header_text }}</div>
+          <div style="font-size:12px;color:#6e6e73;margin-top:2px;">Employee Notice Board</div>
+        </td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:24px 28px 8px 28px;">
+      <div style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#6e6e73;">
+        {{ category }}{% if priority in ('high', 'urgent') %} &middot; <strong style="color:#d70015;">{{ priority|upper }}</strong>{% endif %} &middot; {{ date }}
+      </div>
+      <h1 style="font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-0.02em;margin:10px 0 0 0;color:#1d1d1f;">{{ title }}</h1>
+    </td></tr>
+    <tr><td style="padding:12px 28px 20px 28px;font-size:15px;line-height:1.6;color:#1d1d1f;">
+      {{ body_html|safe }}
+    </td></tr>
+    {% if images %}
+    <tr><td style="padding:0 28px 12px 28px;">
+      {% for src in images %}<img src="{{ src }}" alt="Notice image" width="584" style="display:block;width:100%;max-width:584px;height:auto;border:0;margin:0 0 12px 0;">{% endfor %}
+    </td></tr>
+    {% endif %}
+    {% if attachments %}
+    <tr><td style="padding:0 28px 20px 28px;font-size:14px;">
+      <div style="font-weight:600;margin-bottom:6px;">Attachments</div>
+      {% for name, url in attachments %}<div><a href="{{ url }}" style="color:#0066cc;">{{ name }}</a></div>{% endfor %}
+      <div style="font-size:12px;color:#6e6e73;margin-top:6px;">Sign in to the notice board to download attachments.</div>
+    </td></tr>
+    {% endif %}
+    <tr><td style="padding:16px 28px;border-top:1px solid #e0e0e0;font-size:12px;color:#6e6e73;line-height:1.5;">
+      {{ footer_text }}<br>This is an internal communication for Shangri La Tours employees.
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>

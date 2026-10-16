@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.production)",
+      "Read(./backend/.env)",
+      "Read(./backups/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(bash scripts/deploy/*)",
+      "Bash(scripts/deploy/*)",
+      "Bash(ssh:*)"
+    ]
+  }
+}

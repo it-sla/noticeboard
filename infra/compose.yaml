@@ -1,0 +1,52 @@
+# Development stack: docker compose --env-file .env -f infra/compose.yaml up --build
+name: notice-dev
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-notice}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notice}
+      POSTGRES_DB: ${POSTGRES_DB:-notice}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notice} -d ${POSTGRES_DB:-notice}"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ../backend
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    environment: &app-env
+      ENV: development
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-notice}:${POSTGRES_PASSWORD:-notice}@db:5432/${POSTGRES_DB:-notice}
+      CORS_ORIGINS: http://localhost:5173
+      PUBLIC_BASE_URL: http://localhost:5173
+      EMAIL_MODE: ${EMAIL_MODE:-dry_run}
+      SMTP_HOST: ${SMTP_HOST:-smtp.hostinger.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-true}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-it@gohimalaya.travel}
+    volumes: [../backend/app:/srv/app, attachments:/data/attachments]
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on: {db: {condition: service_healthy}}
+
+  worker:
+    build: ../backend
+    command: python -m app.workers.email_worker
+    environment: *app-env
+    volumes: [../backend/app:/srv/app, attachments:/data/attachments]
+    depends_on: {backend: {condition: service_healthy}}
+
+  frontend:
+    build: {context: ../frontend, target: dev}
+    environment: {VITE_API_PROXY: "http://backend:8000"}
+    volumes: [../frontend/src:/app/src]
+    ports: ["127.0.0.1:5173:5173"]
+    depends_on: [backend]
+
+volumes:
+  pgdata:
+  attachments:

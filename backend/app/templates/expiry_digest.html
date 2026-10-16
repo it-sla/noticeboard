@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Expiry reminders</title></head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,'SF Pro Text','Segoe UI',Roboto,Arial,sans-serif;color:#1d1d1f;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;">
+<tr><td align="center" style="padding:24px 12px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #e0e0e0;border-radius:18px;">
+    <tr><td style="padding:18px 28px;border-bottom:1px solid #e0e0e0;">
+      <img src="{{ logo_src }}" width="140" alt="Shangri La Tours" style="display:block;width:140px;height:auto;border:0;">
+    </td></tr>
+    <tr><td style="padding:24px 28px 8px 28px;">
+      <div style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#6e6e73;">Expiry reminders &middot; {{ today }}</div>
+      <h1 style="font-size:24px;line-height:1.15;font-weight:600;letter-spacing:-0.02em;margin:10px 0 0 0;">Renewals that need attention</h1>
+    </td></tr>
+    {% if overdue %}
+    <tr><td style="padding:16px 28px 4px 28px;">
+      <div style="font-size:14px;font-weight:600;color:#d70015;margin-bottom:6px;">Overdue ({{ overdue|length }})</div>
+      {% for it, days in overdue %}
+      <div style="padding:8px 0;border-top:1px solid #f0f0f0;font-size:14px;"><strong>{{ it.subject }}</strong> &mdash; {{ it.item_type }}<br>
+        <span style="color:#6e6e73;">Expired {{ it.expires_on }} ({{ days }} day{{ '' if days == 1 else 's' }} ago){% if it.reference_no %} &middot; {{ it.reference_no }}{% endif %}</span></div>
+      {% endfor %}
+    </td></tr>
+    {% endif %}
+    {% if due_soon %}
+    <tr><td style="padding:16px 28px 4px 28px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Due soon ({{ due_soon|length }})</div>
+      {% for it, days in due_soon %}
+      <div style="padding:8px 0;border-top:1px solid #f0f0f0;font-size:14px;"><strong>{{ it.subject }}</strong> &mdash; {{ it.item_type }}<br>
+        <span style="color:#6e6e73;">{{ days }} day{{ '' if days == 1 else 's' }} left &middot; expires {{ it.expires_on }}{% if it.reference_no %} &middot; {{ it.reference_no }}{% endif %}</span></div>
+      {% endfor %}
+    </td></tr>
+    {% endif %}
+    <tr><td style="padding:16px 28px 24px 28px;font-size:14px;"><a href="{{ base_url }}/expiry" style="color:#0066cc;">Open the Expiry Tracker</a></td></tr>
+    <tr><td style="padding:16px 28px;border-top:1px solid #e0e0e0;font-size:12px;color:#6e6e73;">Internal reminder for administrators.</td></tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,43 @@
+[project]
+name = "employee-notice-board"
+version = "0.1.0"
+description = "Shangri La Tours Employee Notice Board - API and email worker"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi~=0.143.1",
+  "uvicorn[standard]~=0.54.0",
+  "sqlalchemy~=2.1.4",
+  "alembic~=1.20.0",
+  "psycopg[binary]~=3.3.6",
+  "pydantic~=2.14.1",
+  "pydantic-settings~=2.16.0",
+  "argon2-cffi~=25.1.0",
+  "nh3~=0.3.7",
+  "openpyxl~=3.1.5",
+  "pillow~=12.3",
+  "python-multipart~=0.0.32",
+  "email-validator~=2.3.0",
+  "jinja2~=3.1.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest~=9.1", "httpx~=0.28", "ruff~=0.17", "aiosmtpd~=1.4"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101", "B008", "E501", "UP046"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "E501"]

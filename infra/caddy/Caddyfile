@@ -1,0 +1,8 @@
+# TLS terminates here. SITE_ADDRESS e.g. notices.example.com
+# TLS_MODE: "internal" (Caddy's private CA, for LAN/test) or an email address (public ACME certificate).
+{$SITE_ADDRESS} {
+	tls {$TLS_MODE:internal}
+	encode gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	reverse_proxy frontend:8080
+}

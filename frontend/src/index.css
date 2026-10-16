@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Design tokens: see /DESIGN.md (Apple-inspired). One accent: Action Blue. */
+@theme {
+  --color-brand-50: #f5f5f7;
+  --color-brand-100: #d2d2d7;
+  --color-brand-600: #0071e3;
+  --color-brand-700: #0066cc;
+  --color-brand-800: #0058b0;
+  --color-ink: #1d1d1f;
+  --color-parchment: #f5f5f7;
+  --color-hairline: #e0e0e0;
+  --color-tile: #272729;
+  --font-sans: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, "Segoe UI", Inter, "Noto Sans Devanagari", sans-serif;
+}
+
+html { font-size: 15px; }
+body {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2 { letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid #0071e3; outline-offset: 2px; }
+button:not(:disabled):active, a.btn:active { transform: scale(0.95); }
+button, a.btn { transition: transform 0.1s ease, background-color 0.15s ease; }
+dialog { border: 0; border-radius: 18px; }
+dialog::backdrop { background: rgb(0 0 0 / 0.45); backdrop-filter: blur(4px); }
+input[type="checkbox"], input[type="radio"] { accent-color: #0066cc; }
+progress { accent-color: #0066cc; }
+
+.prose-notice p { margin: 0.5rem 0; }
+.prose-notice ul { list-style: disc; padding-left: 1.25rem; }
+.prose-notice ol { list-style: decimal; padding-left: 1.25rem; }
+.prose-notice h1 { font-size: 1.4rem; font-weight: 600; margin: 0.75rem 0; }
+.prose-notice h2 { font-size: 1.2rem; font-weight: 600; margin: 0.75rem 0; }
+.prose-notice a { color: #0066cc; text-decoration: underline; }
+.prose-notice blockquote { border-left: 3px solid #d2d2d7; padding-left: 0.75rem; color: #7a7a7a; }

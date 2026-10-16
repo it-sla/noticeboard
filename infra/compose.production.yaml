@@ -1,0 +1,98 @@
+# Production stack. Always pass the env file explicitly:
+#   docker compose --env-file .env.production -f infra/compose.production.yaml up -d --build
+# PostgreSQL is NOT published to the host; only the proxy exposes 80/443.
+name: notice
+x-app-env: &app-env
+  ENV: production
+  DATABASE_URL: postgresql+psycopg://${APP_DB_USER}:${APP_DB_PASSWORD}@db:5432/${POSTGRES_DB}
+  CORS_ORIGINS: https://${SITE_ADDRESS}
+  PUBLIC_BASE_URL: https://${SITE_ADDRESS}
+  COOKIE_SECURE: "true"
+  DOCS_ENABLED: "false"
+  EMAIL_MODE: ${EMAIL_MODE:-dry_run}
+  SMTP_HOST: ${SMTP_HOST:-smtp.hostinger.com}
+  SMTP_PORT: ${SMTP_PORT:-465}
+  SMTP_USE_SSL: ${SMTP_USE_SSL:-true}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-it@gohimalaya.travel}
+  EMAIL_RATE_PER_MINUTE: ${EMAIL_RATE_PER_MINUTE:-20}
+  EMAIL_RATE_PER_DAY: ${EMAIL_RATE_PER_DAY:-300}
+  ATTACHMENT_MODE: ${ATTACHMENT_MODE:-attach}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/10-app-role.sh:/docker-entrypoint-initdb.d/10-app-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+    networks: [internal]
+
+  migrate:
+    build: ../backend
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      <<: *app-env
+      MIGRATE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on: {db: {condition: service_healthy}}
+    networks: [internal]
+
+  backend:
+    build: ../backend
+    restart: unless-stopped
+    environment: *app-env
+    volumes: [attachments:/data/attachments]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    networks: [internal]
+
+  worker:
+    build: ../backend
+    restart: unless-stopped
+    command: python -m app.workers.email_worker
+    environment: *app-env
+    volumes: [attachments:/data/attachments]
+    healthcheck:
+      disable: true
+    depends_on:
+      backend: {condition: service_healthy}
+    networks: [internal]
+
+  frontend:
+    build: {context: ../frontend, target: prod}
+    restart: unless-stopped
+    depends_on: [backend]
+    networks: [internal]
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+      TLS_MODE: ${TLS_MODE:-internal}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [frontend]
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  pgdata:
+  attachments:
+  caddy_data:
